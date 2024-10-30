@@ -3,56 +3,93 @@ package org.example.studentmanagementsystem.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "student")
+@Table(name = "students")
 public class Student {
-    // Student a Entity having
-    @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
-    private long id;
-    @Column(name = "first_name", nullable = false) //for custom name and not null
-    private String fName;
-    @Column(name = "last_name", nullable = false)
-    private String lName;
-    private String email; //will create column name as of the field i.e. email if not assigned
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(name = "student_card_number", nullable = false, unique = true)
+    private String studentCardNumber;
+
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(name = "course", nullable = false)
+    private int course;
+
+    @Column(name = "major_code", nullable = false)
+    private String majorCode;
+
+    @Column(name = "average_score", nullable = false)
+    private double averageScore;
+
+    @Column(name = "public_work_participation", nullable = false)
+    private boolean publicWorkParticipation; // true for '1' and false for '0'
+
+    public Student() {
+    }
+
+    public Student(String studentCardNumber, String fullName, int course, String majorCode, double averageScore, boolean publicWorkParticipation) {
+        this.studentCardNumber = studentCardNumber;
+        this.fullName = fullName;
+        this.course = course;
+        this.majorCode = majorCode;
+        this.averageScore = averageScore;
+        this.publicWorkParticipation = publicWorkParticipation;
+    }
+
+    // Getters and setters
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public String getStudentCardNumber() {
+        return studentCardNumber;
     }
 
-    public String getfName() {
-        return fName;
+    public void setStudentCardNumber(String studentCardNumber) {
+        this.studentCardNumber = studentCardNumber;
     }
 
-    public void setfName(String fName) {
-        this.fName = fName;
+    public String getFullName() {
+        return fullName;
     }
 
-    public String getlName() {
-        return lName;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public void setlName(String lName) {
-        this.lName = lName;
+    public int getCourse() {
+        return course;
     }
 
-    public String getEmail() {
-        return email;
+    public void setCourse(int course) {
+        this.course = course;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public Student (){
-
+    public String getMajorCode() {
+        return majorCode;
     }
 
-    public Student(String fName, String lName, String email) {
-        this.fName = fName;
-        this.lName = lName;
-        this.email = email;
+    public void setMajorCode(String majorCode) {
+        this.majorCode = majorCode;
+    }
+
+    public double getAverageScore() {
+        return averageScore;
+    }
+
+    public void setAverageScore(double averageScore) {
+        this.averageScore = averageScore;
+    }
+
+    public boolean isPublicWorkParticipation() {
+        return publicWorkParticipation;
+    }
+
+    public void setPublicWorkParticipation(boolean publicWorkParticipation) {
+        this.publicWorkParticipation = publicWorkParticipation;
     }
 }

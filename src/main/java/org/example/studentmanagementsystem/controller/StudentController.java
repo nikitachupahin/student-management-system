@@ -47,17 +47,20 @@ public class StudentController {
         model.addAttribute("student", service.getStudentById(id));
         return "update-student";
     }
+
     @PostMapping("students/{id}")
-    String editStudent(@PathVariable Long id,@ModelAttribute("student") Student student){
-        Student existingStudent = service.getStudentById(id); // get existing student to update existing data
+    String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student) {
+        Student existingStudent = service.getStudentById(id); // отримуємо існуючого студента для оновлення даних
 
-        existingStudent.setId(id);
-        existingStudent.setfName(student.getfName());
-        existingStudent.setlName(student.getlName());
-        existingStudent.setEmail(student.getEmail());
+        existingStudent.setFullName(student.getFullName());
+        existingStudent.setCourse(student.getCourse());
+        existingStudent.setMajorCode(student.getMajorCode());
+        existingStudent.setAverageScore(student.getAverageScore());
+        existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
 
-        service.updateStudent(existingStudent); //fetch to  update the existing student
+        service.updateStudent(existingStudent); // оновлюємо існуючого студента
         return "redirect:/students";
     }
+
 
 }
