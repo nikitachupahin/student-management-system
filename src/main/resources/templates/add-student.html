@@ -33,16 +33,50 @@
                     </div>
                     <div class="form-group">
                         <label>Course</label>
-                        <input type="number" class="form-control" th:field="*{course}" placeholder="Course" required>
+                        <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
                     </div>
+
+                    <div id="subjects-container">
+
+                    </div>
+
+                    <script>
+                        function updateSubjects() {
+                            const course = document.getElementById("course").value;
+                            const container = document.getElementById("subjects-container");
+                            container.innerHTML = "";
+
+                            let subjects = [];
+
+
+                            if (course == 1) {
+                                subjects = ["CS", "ASD", "English", "Math", "SA"];
+                            } else if (course == 2) {
+                                subjects = ["CS", "ASD", "English", "SA"];
+                            } else if (course == 3) {
+                                subjects = ["CS", "ML", "English", "Math", "SA"];
+                            } else if (course == 4) {
+                                subjects = ["CS", "ML", "English"];
+                            }
+
+
+                            subjects.forEach(subject => {
+                                const div = document.createElement("div");
+                                div.className = "form-group";
+                                div.innerHTML = `
+                <label>${subject}</label>
+                <input type="number" step="0.1" min="0" max="5" class="form-control" name="grades[${subject}]" placeholder="Enter grade for ${subject}" required>
+            `;
+                                container.appendChild(div);
+                            });
+                        }
+                    </script>
+
                     <div class="form-group">
                         <label>Major Code</label>
                         <input type="text" class="form-control" th:field="*{majorCode}" placeholder="Major Code" required>
                     </div>
-                    <div class="form-group">
-                        <label>Average Score</label>
-                        <input type="number" step="0.01" class="form-control" th:field="*{averageScore}" placeholder="Average Score" required>
-                    </div>
+
                     <div class="form-group">
                         <label>Number of Exams</label>
                         <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>

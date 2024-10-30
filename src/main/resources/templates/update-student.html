@@ -29,15 +29,11 @@
           </div>
           <div class="form-group">
             <label>Course</label>
-            <input type="number" class="form-control" th:field="*{course}" placeholder="Course" min="1" max="6" required>
+            <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
           </div>
           <div class="form-group">
             <label>Major Code</label>
             <input type="text" class="form-control" th:field="*{majorCode}" placeholder="Major Code" required>
-          </div>
-          <div class="form-group">
-            <label>Average Score (Current Semester)</label>
-            <input type="number" step="0.01" class="form-control" th:field="*{averageScore}" placeholder="Average Score" required>
           </div>
           <div class="form-group">
             <label>Number of Exams (Current Semester)</label>
