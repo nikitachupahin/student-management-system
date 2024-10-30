@@ -1,6 +1,7 @@
 package org.example.studentmanagementsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "students")
@@ -26,21 +27,28 @@ public class Student {
     private double averageScore;
 
     @Column(name = "public_work_participation", nullable = false)
-    private boolean publicWorkParticipation; // true for '1' and false for '0'
+    private boolean publicWorkParticipation;
+
+    @Column(name = "number_of_exams", nullable = false)
+    private int numberOfExams;
+
+    @Column(name = "dormitory", nullable = false)
+    private boolean livingInDormitory;
 
     public Student() {
     }
 
-    public Student(String studentCardNumber, String fullName, int course, String majorCode, double averageScore, boolean publicWorkParticipation) {
+    public Student(String studentCardNumber, String fullName, int course, String majorCode, double averageScore, boolean publicWorkParticipation, int numberOfExams, boolean livingInDormitory) {
         this.studentCardNumber = studentCardNumber;
         this.fullName = fullName;
         this.course = course;
         this.majorCode = majorCode;
         this.averageScore = averageScore;
         this.publicWorkParticipation = publicWorkParticipation;
+        this.numberOfExams = numberOfExams;
+        this.livingInDormitory = livingInDormitory;
     }
 
-    // Getters and setters
     public long getId() {
         return id;
     }
@@ -91,5 +99,21 @@ public class Student {
 
     public void setPublicWorkParticipation(boolean publicWorkParticipation) {
         this.publicWorkParticipation = publicWorkParticipation;
+    }
+
+    public int getNumberOfExams() {
+        return numberOfExams;
+    }
+
+    public void setNumberOfExams(int numberOfExams) {
+        this.numberOfExams = numberOfExams;
+    }
+
+    public boolean isLivingInDormitory() {
+        return livingInDormitory;
+    }
+
+    public void setLivingInDormitory(boolean livingInDormitory) {
+        this.livingInDormitory = livingInDormitory;
     }
 }

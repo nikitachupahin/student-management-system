@@ -14,14 +14,6 @@
     <ul class="navbar-nav">
         <li class="nav-item"><a class="nav-link" href="/students">All students</a></li>
         <li class="nav-item"><a class="nav-link" href="students/add">Add Students</a></li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">More</a>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">Link 1</a>
-                <a class="dropdown-item" href="#">Link 2</a>
-                <a class="dropdown-item" href="#">Link 3</a>
-            </div>
-        </li>
     </ul>
 </nav>
 
@@ -33,7 +25,7 @@
                 <form th:action="@{/students}" th:object="${student}" method="post">
                     <div class="form-group">
                         <label>Student Card Number</label>
-                        <input type="text" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
+                        <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
                     </div>
                     <div class="form-group">
                         <label>Full Name</label>
@@ -52,8 +44,19 @@
                         <input type="number" step="0.01" class="form-control" th:field="*{averageScore}" placeholder="Average Score" required>
                     </div>
                     <div class="form-group">
+                        <label>Number of Exams</label>
+                        <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>
+                    </div>
+                    <div class="form-group">
                         <label>Participation in Public Work</label>
                         <select class="form-control" th:field="*{publicWorkParticipation}" required>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Living in Dormitory</label>
+                        <select class="form-control" th:field="*{livingInDormitory}" required>
                             <option value="1">Yes</option>
                             <option value="0">No</option>
                         </select>

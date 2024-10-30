@@ -8,23 +8,26 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class StudentController {
-    // A controller for student to handle requests
     private StudentService service;
     public StudentController(StudentService service) {
         this.service = service;
     }
 
-
-    //get all students
-    @RequestMapping("/students")
-    String getAllStudents(Model model){ // create a model  to send data betn view and controller
+    @RequestMapping("/")
+    String getHome(Model model){
         model.addAttribute("students",service.getAllStudents());
-        return "students"; // returns a students view which should be created inside templates
+        return "students";
+    }
+
+    @RequestMapping("/students")
+    String getAllStudents(Model model){
+        model.addAttribute("students",service.getAllStudents());
+        return "students";
     }
 
     @RequestMapping("students/add")
     String addStudentForm(Model model){
-        Student student = new Student(); // object to hold student data
+        Student student = new Student();
         model.addAttribute("student",student);
         return "add-student";
     }
@@ -43,22 +46,23 @@ public class StudentController {
 
     @GetMapping("students/update/{id}")
     String updateStudentForm(@PathVariable("id")Long id, Model model) throws Exception{
-        Student student = new Student();
         model.addAttribute("student", service.getStudentById(id));
         return "update-student";
     }
 
     @PostMapping("students/{id}")
     String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student) {
-        Student existingStudent = service.getStudentById(id); // отримуємо існуючого студента для оновлення даних
+        Student existingStudent = service.getStudentById(id);
 
         existingStudent.setFullName(student.getFullName());
         existingStudent.setCourse(student.getCourse());
         existingStudent.setMajorCode(student.getMajorCode());
         existingStudent.setAverageScore(student.getAverageScore());
         existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
+        existingStudent.setNumberOfExams(student.getNumberOfExams());
+        existingStudent.setLivingInDormitory(student.isLivingInDormitory());
 
-        service.updateStudent(existingStudent); // оновлюємо існуючого студента
+        service.updateStudent(existingStudent);
         return "redirect:/students";
     }
 
