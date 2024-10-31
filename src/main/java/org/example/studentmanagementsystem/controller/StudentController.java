@@ -19,12 +19,6 @@ public class StudentController {
         this.service = service;
     }
 
-    @RequestMapping("/")
-    String getHome(Model model){
-        model.addAttribute("students", service.getAllStudents());
-        return "students";
-    }
-
     @RequestMapping("/students")
     String getAllStudents(Model model){
         model.addAttribute("students", service.getAllStudents());

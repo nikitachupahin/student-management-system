@@ -2,109 +2,104 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add Student - SMS</title>
-    <link rel="stylesheet" href="/static/main.css">
+    <title>Add Student</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
+<style>
+    .d-flex button {
+        font-size: 20px;
+    }
+</style>
 <body>
+    <div th:replace="header.html"></div>
+    <div class="container mt-5 mb-5">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+                <h1 class="text-center mt-4">Add New Student to SMS</h1>
+                <div class="card-body">
+                    <form th:action="@{/students}" th:object="${student}" method="post">
+                        <div class="form-group">
+                            <label>Student Card Number</label>
+                            <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" th:field="*{fullName}" placeholder="Full Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Course</label>
+                            <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
+                        </div>
 
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <a class="navbar-brand" href="#">SMS</a>
-    <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="/students">All students</a></li>
-        <li class="nav-item"><a class="nav-link" href="students/add">Add Students</a></li>
-    </ul>
-</nav>
+                        <div id="subjects-container">
 
-<div class="container" style="padding-top: 20px">
-    <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
-            <h1 class="text-center" style="padding-top: 10px">Add New Student to SMS</h1>
-            <div class="card-body">
-                <form th:action="@{/students}" th:object="${student}" method="post">
-                    <div class="form-group">
-                        <label>Student Card Number</label>
-                        <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" class="form-control" th:field="*{fullName}" placeholder="Full Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Course</label>
-                        <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
-                    </div>
+                        </div>
 
-                    <div id="subjects-container">
+                        <script>
+                            function updateSubjects() {
+                                const course = document.getElementById("course").value;
+                                const container = document.getElementById("subjects-container");
+                                container.innerHTML = "";
 
-                    </div>
-
-                    <script>
-                        function updateSubjects() {
-                            const course = document.getElementById("course").value;
-                            const container = document.getElementById("subjects-container");
-                            container.innerHTML = "";
-
-                            let subjects = [];
+                                let subjects = [];
 
 
-                            if (course == 1) {
-                                subjects = ["CS", "ASD", "English", "Math", "SA"];
-                            } else if (course == 2) {
-                                subjects = ["CS", "ASD", "English", "SA"];
-                            } else if (course == 3) {
-                                subjects = ["CS", "ML", "English", "Math", "SA"];
-                            } else if (course == 4) {
-                                subjects = ["CS", "ML", "English"];
+                                if (course == 1) {
+                                    subjects = ["CS", "ASD", "English", "Math", "SA"];
+                                } else if (course == 2) {
+                                    subjects = ["CS", "ASD", "English", "SA"];
+                                } else if (course == 3) {
+                                    subjects = ["CS", "ML", "English", "Math", "SA"];
+                                } else if (course == 4) {
+                                    subjects = ["CS", "ML", "English"];
+                                }
+
+
+                                subjects.forEach(subject => {
+                                    const div = document.createElement("div");
+                                    div.className = "form-group";
+                                    div.innerHTML = `
+                    <label>${subject}</label>
+                    <input type="number" step="0.1" min="0" max="5" class="form-control" name="grades[${subject}]" placeholder="Enter grade for ${subject}" required>
+                `;
+                                    container.appendChild(div);
+                                });
                             }
+                        </script>
 
+                        <div class="form-group">
+                            <label>Major Code</label>
+                            <input type="text" class="form-control" th:field="*{majorCode}" placeholder="Major Code" required>
+                        </div>
 
-                            subjects.forEach(subject => {
-                                const div = document.createElement("div");
-                                div.className = "form-group";
-                                div.innerHTML = `
-                <label>${subject}</label>
-                <input type="number" step="0.1" min="0" max="5" class="form-control" name="grades[${subject}]" placeholder="Enter grade for ${subject}" required>
-            `;
-                                container.appendChild(div);
-                            });
-                        }
-                    </script>
-
-                    <div class="form-group">
-                        <label>Major Code</label>
-                        <input type="text" class="form-control" th:field="*{majorCode}" placeholder="Major Code" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Number of Exams</label>
-                        <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Participation in Public Work</label>
-                        <select class="form-control" th:field="*{publicWorkParticipation}" required>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Living in Dormitory</label>
-                        <select class="form-control" th:field="*{livingInDormitory}" required>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
-                    <div class="form-check footer-body">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus ml-2"> Add Student</i></button>
-                        <button type="reset" class="btn btn-warning"><i class="fa fa-remove ml-2">Clear All</i></button>
-                    </div>
-                </form>
-                <br>
-                <center><h4>Go Back to <a th:href="@{/students}">List of Students</a></h4></center>
+                        <div class="form-group">
+                            <label>Number of Exams</label>
+                            <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Participation in Public Work</label>
+                            <select class="form-control" th:field="*{publicWorkParticipation}" required>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Living in Dormitory</label>
+                            <select class="form-control" th:field="*{livingInDormitory}" required>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-around mt-4">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus ml-2"> Add Student</i></button>
+                            <button type="reset" class="btn btn-warning"><i class="fa fa-remove ml-2">Clear All</i></button>
+                        </div>
+                    </form>
+                    <h4 class="mt-4 text-center">Go Back to <a th:href="@{/students}">List of Students</a></h4>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
 </html>

@@ -113,6 +113,10 @@ public class StudentServiceImpl implements StudentService {
         boolean courseChanged = existingStudent.getCourse() != student.getCourse();
         existingStudent.setCourse(student.getCourse());
         existingStudent.setFullName(student.getFullName());
+        existingStudent.setNumberOfExams(student.getNumberOfExams());
+        existingStudent.setLivingInDormitory(student.isLivingInDormitory());
+        existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
+        existingStudent.setMajorCode(student.getMajorCode());
 
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
         Map<String, StudentGrade> gradeMap = existingGrades.stream()
