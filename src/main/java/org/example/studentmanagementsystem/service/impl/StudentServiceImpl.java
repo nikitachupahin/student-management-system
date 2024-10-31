@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -104,13 +105,19 @@ public class StudentServiceImpl implements StudentService {
         if (student.getStudentCardNumber() == null) {
             throw new IllegalArgumentException("Student card number cannot be null.");
         }
+        Student existingStudent = studentRepository.findById(student.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
-        student = studentRepository.save(student);
+        boolean courseChanged = existingStudent.getCourse() != student.getCourse();
+
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
 
-        boolean hasChanges = false;
+        boolean gradesChanged = false;
         double totalScore = 0;
         int count = 0;
+
+        Map<String, StudentGrade> gradeMap = existingGrades.stream()
+                .collect(Collectors.toMap(StudentGrade::getSubjectName, g -> g));
 
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
             String subject = entry.getKey();
@@ -127,33 +134,41 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
-            StudentGrade existingGrade = existingGrades.stream()
-                    .filter(g -> g.getSubjectName().equals(subject))
-                    .findFirst().orElse(null);
+            StudentGrade existingGrade = gradeMap.get(subject);
 
-            if (existingGrade == null || existingGrade.getGrade() != gradeValue.floatValue()) {
-                hasChanges = true;
+            if (existingGrade == null) {
+                gradesChanged = true;
                 StudentGrade grade = new StudentGrade();
                 grade.setStudentId(student.getId());
                 grade.setCourse(student.getCourse());
                 grade.setSubjectName(subject);
                 grade.setGrade(gradeValue.floatValue());
                 studentGradeRepository.save(grade);
+            } else if (existingGrade.getGrade() != gradeValue.floatValue()) {
+                gradesChanged = true;
+                existingGrade.setGrade(gradeValue.floatValue());
+                studentGradeRepository.save(existingGrade);
             }
 
             totalScore += gradeValue;
             count++;
         }
 
-
-        if (hasChanges) {
-            student.setAverageScore(count > 0 ? totalScore / count : 0);
+        if (courseChanged || gradesChanged) {
+            student.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
             logService.log("Updating student: " + student.getFullName() + " with new average score: " + student.getAverageScore());
         }
 
-        studentRepository.save(student);
+        if (courseChanged || gradesChanged) {
+            studentRepository.save(student);
+        }
+
         return student;
     }
+
+
+
+
 
 
 
