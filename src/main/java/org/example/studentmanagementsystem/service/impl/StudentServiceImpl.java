@@ -10,6 +10,7 @@ import org.example.studentmanagementsystem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,19 +106,22 @@ public class StudentServiceImpl implements StudentService {
         if (student.getStudentCardNumber() == null) {
             throw new IllegalArgumentException("Student card number cannot be null.");
         }
+
         Student existingStudent = studentRepository.findById(student.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         boolean courseChanged = existingStudent.getCourse() != student.getCourse();
+        existingStudent.setCourse(student.getCourse());
+        existingStudent.setFullName(student.getFullName());
 
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
+        Map<String, StudentGrade> gradeMap = existingGrades.stream()
+                .collect(Collectors.toMap(StudentGrade::getSubjectName, g -> g));
 
         boolean gradesChanged = false;
         double totalScore = 0;
         int count = 0;
-
-        Map<String, StudentGrade> gradeMap = existingGrades.stream()
-                .collect(Collectors.toMap(StudentGrade::getSubjectName, g -> g));
+        List<StudentGrade> updatedGrades = new ArrayList<>();
 
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
             String subject = entry.getKey();
@@ -138,33 +142,44 @@ public class StudentServiceImpl implements StudentService {
 
             if (existingGrade == null) {
                 gradesChanged = true;
-                StudentGrade grade = new StudentGrade();
-                grade.setStudent(student);
-                grade.setCourse(student.getCourse());
-                grade.setSubjectName(subject);
-                grade.setGrade(gradeValue.floatValue());
-                studentGradeRepository.save(grade);
+                StudentGrade newGrade = new StudentGrade();
+                newGrade.setStudent(existingStudent);
+                newGrade.setCourse(existingStudent.getCourse());
+                newGrade.setSubjectName(subject);
+                newGrade.setGrade(gradeValue.floatValue());
+                updatedGrades.add(newGrade);
             } else if (existingGrade.getGrade() != gradeValue.floatValue()) {
                 gradesChanged = true;
                 existingGrade.setGrade(gradeValue.floatValue());
-                studentGradeRepository.save(existingGrade);
+                updatedGrades.add(existingGrade);
             }
 
             totalScore += gradeValue;
             count++;
         }
 
-        if (courseChanged || gradesChanged) {
-            student.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
-            logService.log("Updating student: " + student.getFullName() + " with new average score: " + student.getAverageScore());
+        List<StudentGrade> gradesToRemove = existingGrades.stream()
+                .filter(grade -> !grades.containsKey(grade.getSubjectName()))
+                .collect(Collectors.toList());
+        if (!gradesToRemove.isEmpty()) {
+            studentGradeRepository.deleteAll(gradesToRemove);
+            gradesChanged = true;
+        }
+
+        if (gradesChanged) {
+            studentGradeRepository.saveAll(updatedGrades);
         }
 
         if (courseChanged || gradesChanged) {
-            studentRepository.save(student);
+            existingStudent.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
+            studentRepository.save(existingStudent);
+            logService.log("Updating student: " + existingStudent.getFullName() + " with new average score: " + existingStudent.getAverageScore());
         }
 
-        return student;
+        return existingStudent;
     }
+
+
 
 
     @Transactional
