@@ -2,6 +2,10 @@ package org.example.studentmanagementsystem.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "students")
 public class Student {
@@ -36,6 +40,10 @@ public class Student {
 
     public Student() {
     }
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentGrade> grades = new ArrayList<>();
+
 
     public Student(String studentCardNumber, String fullName, int course, String majorCode, double averageScore, boolean publicWorkParticipation, int numberOfExams, boolean livingInDormitory) {
         this.studentCardNumber = studentCardNumber;

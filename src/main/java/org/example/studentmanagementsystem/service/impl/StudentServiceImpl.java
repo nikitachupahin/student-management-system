@@ -81,7 +81,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             StudentGrade grade = new StudentGrade();
-            grade.setStudentId(student.getId());
+            grade.setStudent(student);
             grade.setCourse(student.getCourse());
             grade.setSubjectName(subject);
             grade.setGrade(gradeValue.floatValue());
@@ -139,7 +139,7 @@ public class StudentServiceImpl implements StudentService {
             if (existingGrade == null) {
                 gradesChanged = true;
                 StudentGrade grade = new StudentGrade();
-                grade.setStudentId(student.getId());
+                grade.setStudent(student);
                 grade.setCourse(student.getCourse());
                 grade.setSubjectName(subject);
                 grade.setGrade(gradeValue.floatValue());
@@ -167,14 +167,13 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-
-
-
-
-
+    @Transactional
     @Override
     public void deleteStudent(Long id) {
         logService.log("Deleting student with ID: " + id);
+
+        studentGradeRepository.deleteByStudentId(id);
+
         studentRepository.deleteById(id);
     }
 

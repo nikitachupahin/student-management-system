@@ -1,6 +1,7 @@
 package org.example.studentmanagementsystem.entity;
 
 import jakarta.persistence.*;
+
 @Entity
 @Table(name = "student_grades")
 public class StudentGrade {
@@ -9,19 +10,21 @@ public class StudentGrade {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long studentId;
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
+
     private int course;
     private String subjectName;
     private float grade;
 
-    // Getters and setters for each field
 
-    public Long getStudentId() {
-        return studentId;
+    public Student getStudent() {
+        return student;
     }
 
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
     public int getCourse() {
