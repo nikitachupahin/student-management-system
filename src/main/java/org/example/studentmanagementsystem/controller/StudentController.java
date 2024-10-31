@@ -56,8 +56,16 @@ public class StudentController {
     }
 
     @PostMapping("students/{id}")
-    String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student, @RequestParam Map<String, Object  > grades) {
+    String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student, @RequestParam Map<String, Object> grades) {
+
+        Student existingStudent = service.getStudentById(id);
+
+        if (student.getStudentCardNumber() == null || student.getStudentCardNumber().isEmpty()) {
+            student.setStudentCardNumber(existingStudent.getStudentCardNumber());
+        }
+
         service.updateStudent(student, grades);
         return "redirect:/students";
     }
+
 }

@@ -2,7 +2,6 @@ package org.example.studentmanagementsystem.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-
 @Entity
 @Table(name = "students")
 public class Student {
@@ -51,6 +50,10 @@ public class Student {
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getStudentCardNumber() {

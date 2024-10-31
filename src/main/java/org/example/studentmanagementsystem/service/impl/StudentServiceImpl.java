@@ -1,5 +1,6 @@
 package org.example.studentmanagementsystem.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.example.studentmanagementsystem.entity.Student;
 import org.example.studentmanagementsystem.entity.StudentGrade;
 import org.example.studentmanagementsystem.logs.LogService;
@@ -38,7 +39,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private boolean isValidSubject(String subject) {
-        // Перечислите все поля, которые не являются предметами
         return !(subject.equals("fullName") || subject.equals("course") ||
                 subject.equals("studentCardNumber") || subject.equals("majorCode") ||
                 subject.equals("numberOfExams") || subject.equals("publicWorkParticipation") ||
@@ -47,11 +47,12 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student addStudent(Student student, Map<String, Object> grades) {
-        student = studentRepository.save(student);
 
-        if (student.getFullName() == null || student.getFullName().isEmpty()) {
-            throw new IllegalArgumentException("Full name cannot be empty.");
+        if (studentRepository.findByStudentCardNumber(student.getStudentCardNumber()).isPresent()) {
+            throw new IllegalArgumentException("Student card number already exists.");
         }
+
+        student = studentRepository.save(student);
 
         grades.entrySet().removeIf(entry -> !isValidSubject(entry.getKey()));
 
@@ -74,7 +75,7 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
-            if (gradeValue < 0 || gradeValue > 100) {  // замените на подходящий диапазон
+            if (gradeValue < 0 || gradeValue > 100) {
                 throw new IllegalArgumentException("Grade for " + subject + " is out of range: " + gradeValue);
             }
 
@@ -97,50 +98,64 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-
+    @Transactional
     @Override
     public Student updateStudent(Student student, Map<String, Object> grades) {
+        if (student.getStudentCardNumber() == null) {
+            throw new IllegalArgumentException("Student card number cannot be null.");
+        }
 
         student = studentRepository.save(student);
+        List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
 
-        studentGradeRepository.deleteByStudentId(student.getId());
+        boolean hasChanges = false;
         double totalScore = 0;
         int count = 0;
 
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
             String subject = entry.getKey();
-            Double gradeValue;
+            if (!isValidSubject(subject)) {
+                continue;
+            }
 
+            Double gradeValue;
             try {
-                if (entry.getValue() instanceof String) {
-                    gradeValue = Double.parseDouble((String) entry.getValue());
-                } else if (entry.getValue() instanceof Number) {
-                    gradeValue = ((Number) entry.getValue()).doubleValue();
-                } else {
-                    throw new IllegalArgumentException("Invalid grade value for subject " + subject);
-                }
-            } catch (NumberFormatException e) {
+                gradeValue = entry.getValue() instanceof String
+                        ? Double.parseDouble((String) entry.getValue())
+                        : (Double) entry.getValue();
+            } catch (NumberFormatException | ClassCastException e) {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
-            StudentGrade grade = new StudentGrade();
-            grade.setStudentId(student.getId());
-            grade.setCourse(student.getCourse());
-            grade.setSubjectName(subject);
-            grade.setGrade(gradeValue.floatValue());
-            studentGradeRepository.save(grade);
+            StudentGrade existingGrade = existingGrades.stream()
+                    .filter(g -> g.getSubjectName().equals(subject))
+                    .findFirst().orElse(null);
+
+            if (existingGrade == null || existingGrade.getGrade() != gradeValue.floatValue()) {
+                hasChanges = true;
+                StudentGrade grade = new StudentGrade();
+                grade.setStudentId(student.getId());
+                grade.setCourse(student.getCourse());
+                grade.setSubjectName(subject);
+                grade.setGrade(gradeValue.floatValue());
+                studentGradeRepository.save(grade);
+            }
 
             totalScore += gradeValue;
             count++;
         }
 
 
-        student.setAverageScore(count > 0 ? totalScore / count : 0);
-        studentRepository.save(student);
+        if (hasChanges) {
+            student.setAverageScore(count > 0 ? totalScore / count : 0);
+            logService.log("Updating student: " + student.getFullName() + " with new average score: " + student.getAverageScore());
+        }
 
-        logService.log("Updating student: " + student.getFullName() + " with new average score: " + student.getAverageScore());
+        studentRepository.save(student);
         return student;
     }
+
+
 
     @Override
     public void deleteStudent(Long id) {
