@@ -18,5 +18,7 @@ public interface StudentService {
     List<StudentGrade> getGradesByStudentId(Long studentId);
 
     Student updateStudent(Student student, Map<String, Object> grades);
+
+    List<Student> getStudentsWithAllGradesOfFive();
 }
 

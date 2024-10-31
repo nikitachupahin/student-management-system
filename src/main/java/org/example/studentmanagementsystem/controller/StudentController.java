@@ -50,7 +50,9 @@ public class StudentController {
     }
 
     @PostMapping("students/{id}")
-    String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student, @RequestParam Map<String, Object> grades) {
+    String editStudent(@PathVariable Long id, @ModelAttribute("student") Student student,
+                       @RequestParam Map<String, Object> grades,
+                       @RequestParam(value = "redirect", required = false) String redirect) {
 
         Student existingStudent = service.getStudentById(id);
 
@@ -59,15 +61,29 @@ public class StudentController {
         }
 
         service.updateStudent(student, grades);
+
+        if ("IncreasedScholarship".equals(redirect)) {
+            return "redirect:/IncreasedScholarship";
+        }
+
         return "redirect:/students";
     }
+
 
     @GetMapping("students/{id}/grades")
     public String viewStudentGrades(@PathVariable("id") Long id, Model model) {
         Student student = service.getStudentById(id);
-        model.addAttribute("student", service.getStudentById(id));
+        model.addAttribute("student", student);
         model.addAttribute("grades", service.getGradesByStudentId(id));
         return "student-grades";
+    }
+
+
+
+    @RequestMapping("/IncrScholarship")
+    public String getStudentsScholarship(Model model) {
+        model.addAttribute("students", service.getStudentsWithAllGradesOfFive());
+        return "incr-scholarship";
     }
 
 }

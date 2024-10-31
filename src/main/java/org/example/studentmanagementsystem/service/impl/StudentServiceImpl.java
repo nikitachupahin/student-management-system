@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -117,11 +118,9 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
         existingStudent.setGroupCode(student.getGroupCode());
 
-        // Видаляємо всі існуючі оцінки
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
         studentGradeRepository.deleteAll(existingGrades);
 
-        // Додаємо нові чи оновлені оцінки
         List<StudentGrade> updatedGrades = new ArrayList<>();
         double totalScore = 0;
         int count = 0;
@@ -141,7 +140,7 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
-            // Створюємо нову оцінку
+
             StudentGrade newGrade = new StudentGrade();
             newGrade.setStudent(existingStudent);
             newGrade.setCourse(existingStudent.getCourse());
@@ -153,12 +152,12 @@ public class StudentServiceImpl implements StudentService {
             count++;
         }
 
-        // Зберігаємо нові оцінки
+
         if (!updatedGrades.isEmpty()) {
             studentGradeRepository.saveAll(updatedGrades);
         }
 
-        // Оновлюємо середній бал, якщо були зміни в курсі або оцінках
+
         if (courseChanged || !updatedGrades.isEmpty()) {
             existingStudent.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
             studentRepository.save(existingStudent);
@@ -182,6 +181,15 @@ public class StudentServiceImpl implements StudentService {
         studentGradeRepository.deleteByStudentId(id);
 
         studentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Student> getStudentsWithAllGradesOfFive() {
+        logService.log("Retrieving all students on Increased Scholarship");
+        return studentRepository.findAll().stream()
+                .filter(student -> studentGradeRepository.findByStudentId(student.getId()).stream()
+                        .allMatch(grade -> grade.getGrade() == 5))
+                .collect(Collectors.toList());
     }
 
 }
