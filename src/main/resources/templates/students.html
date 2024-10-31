@@ -33,7 +33,7 @@
                                         <th>Student Card Number</th>
                                         <th>Full Name</th>
                                         <th>Course</th>
-                                        <th>Major Code</th>
+                                        <th>Group Code</th>
                                         <th>Average Score</th>
                                         <th>Number of Exams</th>
                                         <th>Public Work Participation</th>
@@ -46,7 +46,7 @@
                                         <td th:text="${student.studentCardNumber}"></td>
                                         <td><a th:text="${student.fullName}" th:href="@{/students/{id}/grades (id=${student.id}) }"></a></td>
                                         <td th:text="${student.course}"></td>
-                                        <td th:text="${student.majorCode}"></td>
+                                        <td th:text="${student.groupCode}"></td>
                                         <td th:text="${student.averageScore}"></td>
                                         <td th:text="${student.numberOfExams}"></td>
                                         <td th:text="${student.publicWorkParticipation ? 'Yes' : 'No'}"></td>

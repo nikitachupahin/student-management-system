@@ -1,7 +1,6 @@
 package org.example.studentmanagementsystem.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,8 @@ public class Student {
     @Column(name = "course", nullable = false)
     private int course;
 
-    @Column(name = "major_code", nullable = false)
-    private String majorCode;
+    @Column(name = "group_code", nullable = false)
+    private String groupCode;
 
     @Column(name = "average_score", nullable = false)
     private double averageScore;
@@ -45,11 +44,11 @@ public class Student {
     private List<StudentGrade> grades = new ArrayList<>();
 
 
-    public Student(String studentCardNumber, String fullName, int course, String majorCode, double averageScore, boolean publicWorkParticipation, int numberOfExams, boolean livingInDormitory) {
+    public Student(String studentCardNumber, String fullName, int course, String groupCode, double averageScore, boolean publicWorkParticipation, int numberOfExams, boolean livingInDormitory) {
         this.studentCardNumber = studentCardNumber;
         this.fullName = fullName;
         this.course = course;
-        this.majorCode = majorCode;
+        this.groupCode = groupCode;
         this.averageScore = averageScore;
         this.publicWorkParticipation = publicWorkParticipation;
         this.numberOfExams = numberOfExams;
@@ -88,12 +87,12 @@ public class Student {
         this.course = course;
     }
 
-    public String getMajorCode() {
-        return majorCode;
+    public String getGroupCode() {
+        return groupCode;
     }
 
-    public void setMajorCode(String majorCode) {
-        this.majorCode = majorCode;
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
     }
 
     public double getAverageScore() {

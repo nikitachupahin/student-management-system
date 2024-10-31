@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -42,7 +41,7 @@ public class StudentServiceImpl implements StudentService {
 
     private boolean isValidSubject(String subject) {
         return !(subject.equals("fullName") || subject.equals("course") ||
-                subject.equals("studentCardNumber") || subject.equals("majorCode") ||
+                subject.equals("studentCardNumber") || subject.equals("groupCode") ||
                 subject.equals("numberOfExams") || subject.equals("publicWorkParticipation") ||
                 subject.equals("livingInDormitory"));
     }
@@ -116,7 +115,7 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setNumberOfExams(student.getNumberOfExams());
         existingStudent.setLivingInDormitory(student.isLivingInDormitory());
         existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
-        existingStudent.setMajorCode(student.getMajorCode());
+        existingStudent.setGroupCode(student.getGroupCode());
 
         // Видаляємо всі існуючі оцінки
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
