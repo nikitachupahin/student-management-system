@@ -57,7 +57,7 @@
                   div.className = "form-group";
                   div.innerHTML = `
                   <label>${subject}</label>
-                  <input type="number" step="0.1" min="0" max="5" class="form-control" name="grades[${subject}]" placeholder="Enter grade for ${subject}" required>
+                  <input type="number" step="0.1" min="0" max="5" class="form-control" name="${subject}" placeholder="Enter grade for ${subject}" required>
               `;
                   container.appendChild(div);
                 });

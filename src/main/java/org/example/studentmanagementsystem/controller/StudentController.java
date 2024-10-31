@@ -62,4 +62,12 @@ public class StudentController {
         return "redirect:/students";
     }
 
+    @GetMapping("students/{id}/grades")
+    public String viewStudentGrades(@PathVariable("id") Long id, Model model) {
+        Student student = service.getStudentById(id);
+        model.addAttribute("student", service.getStudentById(id));
+        model.addAttribute("grades", service.getGradesByStudentId(id));
+        return "student-grades";
+    }
+
 }

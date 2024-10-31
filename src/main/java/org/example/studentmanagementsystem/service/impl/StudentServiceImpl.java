@@ -118,14 +118,14 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
         existingStudent.setMajorCode(student.getMajorCode());
 
+        // Видаляємо всі існуючі оцінки
         List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
-        Map<String, StudentGrade> gradeMap = existingGrades.stream()
-                .collect(Collectors.toMap(StudentGrade::getSubjectName, g -> g));
+        studentGradeRepository.deleteAll(existingGrades);
 
-        boolean gradesChanged = false;
+        // Додаємо нові чи оновлені оцінки
+        List<StudentGrade> updatedGrades = new ArrayList<>();
         double totalScore = 0;
         int count = 0;
-        List<StudentGrade> updatedGrades = new ArrayList<>();
 
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
             String subject = entry.getKey();
@@ -142,39 +142,25 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
-            StudentGrade existingGrade = gradeMap.get(subject);
-
-            if (existingGrade == null) {
-                gradesChanged = true;
-                StudentGrade newGrade = new StudentGrade();
-                newGrade.setStudent(existingStudent);
-                newGrade.setCourse(existingStudent.getCourse());
-                newGrade.setSubjectName(subject);
-                newGrade.setGrade(gradeValue.floatValue());
-                updatedGrades.add(newGrade);
-            } else if (existingGrade.getGrade() != gradeValue.floatValue()) {
-                gradesChanged = true;
-                existingGrade.setGrade(gradeValue.floatValue());
-                updatedGrades.add(existingGrade);
-            }
+            // Створюємо нову оцінку
+            StudentGrade newGrade = new StudentGrade();
+            newGrade.setStudent(existingStudent);
+            newGrade.setCourse(existingStudent.getCourse());
+            newGrade.setSubjectName(subject);
+            newGrade.setGrade(gradeValue.floatValue());
+            updatedGrades.add(newGrade);
 
             totalScore += gradeValue;
             count++;
         }
 
-        List<StudentGrade> gradesToRemove = existingGrades.stream()
-                .filter(grade -> !grades.containsKey(grade.getSubjectName()))
-                .collect(Collectors.toList());
-        if (!gradesToRemove.isEmpty()) {
-            studentGradeRepository.deleteAll(gradesToRemove);
-            gradesChanged = true;
-        }
-
-        if (gradesChanged) {
+        // Зберігаємо нові оцінки
+        if (!updatedGrades.isEmpty()) {
             studentGradeRepository.saveAll(updatedGrades);
         }
 
-        if (courseChanged || gradesChanged) {
+        // Оновлюємо середній бал, якщо були зміни в курсі або оцінках
+        if (courseChanged || !updatedGrades.isEmpty()) {
             existingStudent.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
             studentRepository.save(existingStudent);
             logService.log("Updating student: " + existingStudent.getFullName() + " with new average score: " + existingStudent.getAverageScore());
@@ -184,7 +170,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-
+    @Override
+    public List<StudentGrade> getGradesByStudentId(Long studentId) {
+        return studentGradeRepository.findByStudentId(studentId);
+    }
 
     @Transactional
     @Override
