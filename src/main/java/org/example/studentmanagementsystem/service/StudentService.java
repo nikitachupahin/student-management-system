@@ -21,6 +21,12 @@ public interface StudentService {
 
     List<Student> getStudentsWithAllGradesOfFive();
 
-    public List<Student> getStudentsOnStandardScholarship();
+    List<Student> getStudentsOnStandardScholarship();
+
+    Map<String, List<Student>> getAllStudentsGroupedByGroupCode();
+
+    Map<String, Double> getAverageScoresByGroup();
+
+    List<Student> getStudentsForExpulsion();
 }
 

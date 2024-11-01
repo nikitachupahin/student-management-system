@@ -17,7 +17,7 @@
         <div class="row">
             <h1 class="display-2 mx-auto p-2 mt-5 mb-5">List of Students</h1>
         </div>
-        <div class="container ">
+        <div class="container mb-5">
             <div class="card">
                 <div class="card-body">
                     <div th:switch="${students}" class="container my-3">
@@ -46,7 +46,7 @@
                                         <td th:text="${student.studentCardNumber}"></td>
                                         <td><a th:text="${student.fullName}" th:href="@{/students/{id}/grades (id=${student.id}) }"></a></td>
                                         <td th:text="${student.course}"></td>
-                                        <td th:text="${student.groupCode}"></td>
+                                        <td class="text-uppercase" th:text="${student.groupCode}"></td>
                                         <td th:text="${student.averageScore}"></td>
                                         <td th:text="${student.numberOfExams}"></td>
                                         <td th:text="${student.publicWorkParticipation ? 'Yes' : 'No'}"></td>

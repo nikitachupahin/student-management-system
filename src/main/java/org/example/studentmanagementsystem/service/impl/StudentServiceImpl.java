@@ -235,14 +235,34 @@ public class StudentServiceImpl implements StudentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Map<String, List<Student>> getAllStudentsGroupedByGroupCode() {
+        List<Student> students = studentRepository.findAllByOrderByFullNameAsc();
+        return students.stream().collect(Collectors.groupingBy(Student::getGroupCode));
+    }
 
+    @Override
+    public Map<String, Double> getAverageScoresByGroup() {
+        List<Student> students = studentRepository.findAll();
 
+        return students.stream()
+                .collect(Collectors.groupingBy(
+                        Student::getGroupCode,
+                        Collectors.averagingDouble(Student::getAverageScore)
+                ));
+    }
 
+    @Override
+    public List<Student> getStudentsForExpulsion() {
+        List<Student> students = studentRepository.findAll();
 
-
-
-
-
-
-
+        return students.stream()
+                .filter(student -> {
+                    long failedSubjectsCount = studentGradeRepository.findByStudentId(student.getId()).stream()
+                            .filter(grade -> grade.getGrade() < 3) // assuming grade < 3 is a failing grade (e.g., 2)
+                            .count();
+                    return failedSubjectsCount > 2; // More than 2 failing grades
+                })
+                .collect(Collectors.toList());
+    }
 }

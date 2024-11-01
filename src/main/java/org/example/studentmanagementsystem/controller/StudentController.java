@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -93,5 +94,24 @@ public class StudentController {
         return "standard-scholarship";
     }
 
+    @RequestMapping("/studentsGrouped")
+    String getAllStudentsASCByGroup(Model model) {
+        model.addAttribute("studentsGrouped", service.getAllStudentsGroupedByGroupCode());
+        return "students-by-groups";
+    }
+
+    @RequestMapping("/groupsGrades")
+    public String getGroupsWithAverageScores(Model model) {
+        Map<String, Double> averageScoresByGroup = service.getAverageScoresByGroup();
+        model.addAttribute("averageScoresByGroup", averageScoresByGroup);
+        return "groups-grades";
+    }
+
+    @RequestMapping("/expulsion")
+    public String getStudentsForExpulsion(Model model) {
+        List<Student> studentsForExpulsion = service.getStudentsForExpulsion();
+        model.addAttribute("students", studentsForExpulsion);
+        return "students-for-expulsion";
+    }
 
 }
