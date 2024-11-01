@@ -81,9 +81,17 @@ public class StudentController {
 
 
     @RequestMapping("/IncrScholarship")
-    public String getStudentsScholarship(Model model) {
+    public String getIncrScholarship(Model model) {
         model.addAttribute("students", service.getStudentsWithAllGradesOfFive());
         return "incr-scholarship";
     }
+
+
+    @RequestMapping("/StandardScholarship")
+    public String getStandardScholarship(Model model) {
+        model.addAttribute("students", service.getStudentsOnStandardScholarship());
+        return "standard-scholarship";
+    }
+
 
 }

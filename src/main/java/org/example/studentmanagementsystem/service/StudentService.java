@@ -20,5 +20,7 @@ public interface StudentService {
     Student updateStudent(Student student, Map<String, Object> grades);
 
     List<Student> getStudentsWithAllGradesOfFive();
+
+    public List<Student> getStudentsOnStandardScholarship();
 }
 

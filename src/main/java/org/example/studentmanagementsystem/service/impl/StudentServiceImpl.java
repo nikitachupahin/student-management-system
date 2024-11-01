@@ -191,5 +191,58 @@ public class StudentServiceImpl implements StudentService {
                         .allMatch(grade -> grade.getGrade() == 5))
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<Student> getStudentsOnStandardScholarship() {
+        logService.log("Retrieving all students on Scholarship");
+
+        return studentRepository.findAll().stream()
+                .filter(student -> {
+                    List<StudentGrade> grades = studentGradeRepository.findByStudentId(student.getId());
+
+                    // Condition 1: Exclude students with only grades of 5
+                    boolean hasOnlyFives = grades.stream().allMatch(grade -> grade.getGrade() == 5);
+                    if (hasOnlyFives) {
+                        return false;
+                    }
+
+                    // Condition 2: Exclude students with only grades of 4
+                    boolean hasOnlyFours = grades.stream().allMatch(grade -> grade.getGrade() == 4);
+                    if (hasOnlyFours) {
+                        return false;
+                    }
+
+                    // Condition 3: Check if there are any grades below 3; if so, exclude the student
+                    boolean hasGradesBelowThree = grades.stream().anyMatch(grade -> grade.getGrade() < 3);
+                    if (hasGradesBelowThree) {
+                        return false;
+                    }
+
+                    // Condition 4: Check if there is a mix of grades 4 and 5 (without any other grades)
+                    boolean hasFourAndFiveOnly = grades.stream().allMatch(grade -> grade.getGrade() == 4 || grade.getGrade() == 5);
+                    if (hasFourAndFiveOnly) {
+                        return true;
+                    }
+
+                    // Condition 5: Check if there is only one grade of 3, and all others are 4 or 5
+                    long countOfThree = grades.stream().filter(grade -> grade.getGrade() == 3).count();
+                    boolean allOthersAreFourOrFive = grades.stream()
+                            .filter(grade -> grade.getGrade() != 3)
+                            .allMatch(grade -> grade.getGrade() == 4 || grade.getGrade() == 5);
+
+                    // Return true if there is exactly one grade of 3, all others are 4 or 5, and student participates in public work
+                    return countOfThree == 1 && allOthersAreFourOrFive && student.isPublicWorkParticipation();
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
+
+
+
+
+
 
 }

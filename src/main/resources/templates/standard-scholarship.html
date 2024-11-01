@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Increased Scholarship</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="~{header}"></div>
+<div class="container text-center">
+    <div class="row">
+        <h1 class="display-2 mx-auto p-2 mt-5 mb-5">Standard Scholarship Students</h1>
+    </div>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <div th:switch="${students}" class="container my-3">
+                    <div class="mx-auto">
+                        <h2 th:case="null">No record found !!</h2>
+                        <div th:case="*">
+                            <table class="table table-striped table-bordered table-responsive-md">
+                                <thead class="table-dark">
+                                <tr>
+                                    <th>Student Card Number</th>
+                                    <th>Full Name</th>
+                                    <th>Course</th>
+                                    <th>Group Code</th>
+                                    <th>Average Score</th>
+                                    <th>Number of Exams</th>
+                                    <th>Public Work Participation</th>
+                                    <th>Dormitory</th>
+                                    <th colspan="2">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="student : ${students}">
+                                    <td th:text="${student.studentCardNumber}"></td>
+                                    <td>
+                                        <a th:text="${student.fullName}" th:href="@{/students/{id}/grades (id=${student.id}) }"></a>
+                                    </td>
+                                    <td th:text="${student.course}"></td>
+                                    <td th:text="${student.groupCode}"></td>
+                                    <td th:text="${student.averageScore}"></td>
+                                    <td th:text="${student.numberOfExams}"></td>
+                                    <td th:text="${student.publicWorkParticipation ? 'Yes' : 'No'}"></td>
+                                    <td th:text="${student.livingInDormitory ? 'Yes' : 'No'}"></td>
+                                    <td>
+                                        <a th:href="@{/students/update/{id} (id=${student.id}, redirect='IncreasedScholarship') }" class="btn btn-primary">
+                                            <i class="fas fa-user-edit"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/students/remove/{id} (id=${student.id}) }" class="btn btn-danger">
+                                            <i class="fas fa-user-times"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
