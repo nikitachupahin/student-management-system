@@ -37,6 +37,17 @@ public class Student {
     @Column(name = "dormitory", nullable = false)
     private boolean livingInDormitory;
 
+    public int getRecordBookNumber() {
+        return recordBookNumber;
+    }
+
+    public void setRecordBookNumber(int recordBookNumber) {
+        this.recordBookNumber = recordBookNumber;
+    }
+
+    @Column(name = "record_book_number", nullable = false)
+    private int recordBookNumber;
+
     public Student() {
     }
 

@@ -6,94 +6,107 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
-<style>
-  .d-flex button {
-    font-size: 20px;
-  }
-</style>
 <body>
-  <div th:replace="header"></div>
-  <div class="container mt-5 mb-5">
-    <div class="row">
-      <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
-        <h1 class="text-center mt-4">Update Details of Student Card <span th:text="${student.studentCardNumber}"></span></h1>
-        <div class="card-body">
-          <form th:action="@{/students/{id} (id=${student.getId()})}" th:object="${student}" method="post">
-            <div class="form-group">
-              <label>Full Name</label>
-              <input type="text" class="form-control" th:field="*{fullName}" placeholder="Full Name" required>
-            </div>
-            <div class="form-group">
-              <label>Course</label>
-              <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
-            </div>
+<div th:replace="header"></div>
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+      <h1 class="text-center mt-4">Update Details of Student Card <span th:text="${student.studentCardNumber}"></span></h1>
+      <div class="card-body">
+        <form th:action="@{/students/{id} (id=${student.getId()})}" th:object="${student}" method="post">
+          <div class="form-group">
+            <label>Student Card Number</label>
+            <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" class="form-control" th:field="*{fullName}" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <label>Course</label>
+            <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjectsAndExams()" placeholder="Course" required>
+          </div>
 
-            <div id="subjects-container">
+          <div id="subjects-container"></div>
 
-            </div>
+          <script>
+            function updateSubjectsAndExams() {
+              const course = document.getElementById("course").value;
+              const container = document.getElementById("subjects-container");
+              container.innerHTML = "";
 
-            <script>
-              function updateSubjects() {
-                const course = document.getElementById("course").value;
-                const container = document.getElementById("subjects-container");
-                container.innerHTML = "";
+              // Define subjects and exams based on the course
+              let subjects = [];
+              let exams = [];
 
-                let subjects = [];
-
-
-                if (course == 1) {
-                  subjects = ["CS", "ASD", "English", "Math", "SA"];
-                } else if (course == 2) {
-                  subjects = ["CS", "ASD", "English", "SA"];
-                } else if (course == 3) {
-                  subjects = ["CS", "ML", "English", "Math", "SA"];
-                } else if (course == 4) {
-                  subjects = ["CS", "ML", "English"];
-                }
-
-
-                subjects.forEach(subject => {
-                  const div = document.createElement("div");
-                  div.className = "form-group";
-                  div.innerHTML = `
-                  <label>${subject}</label>
-                  <input type="number" step="0.1" min="0" max="5" class="form-control" name="${subject}" placeholder="Enter grade for ${subject}" required>
-              `;
-                  container.appendChild(div);
-                });
+              if (course == 1) {
+                subjects = ["CS", "ASD", "English", "Math", "SA"];
+                exams = ["CS", "ASD", "Math"];
+              } else if (course == 2) {
+                subjects = ["CS", "ASD", "English", "SA"];
+                exams = ["ASD", "SA"];
+              } else if (course == 3) {
+                subjects = ["CS", "ML", "English", "Math", "SA"];
+                exams = ["ML", "Math"];
+              } else if (course == 4) {
+                subjects = ["CS", "ML", "English"];
+                exams = ["ML", "CS"];
               }
-            </script>
-            <div class="form-group">
-              <label>Group Code</label>
-              <input type="text" class="form-control" th:field="*{groupCode}" placeholder="Group Code" required>
-            </div>
-            <div class="form-group">
-              <label>Number of Exams (Current Semester)</label>
-              <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>
-            </div>
-            <div class="form-group">
-              <label>Participation in Public Work</label>
-              <select class="form-control" th:field="*{publicWorkParticipation}" required>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Living in Dormitory</label>
-              <select class="form-control" th:field="*{livingInDormitory}" required>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-            </div>
-            <div class="d-flex justify-content-around mt-4">
-              <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus ml-2"> Update Student </i></button>
-              <button type="reset" class="btn btn-warning"><i class="fa fa-remove ml-2">Cancel Changes</i> </button>
-            </div>
-          </form>
-          <h4 class="mt-4 text-center">Go Back to <a th:href="@{/students}">List of Students</a></h4>
-        </div>
+
+              // Update the number of exams
+              document.getElementById("numExams").value = exams.length;
+
+              // Dynamically create input fields for each subject
+              subjects.forEach(subject => {
+                const isExam = exams.includes(subject);
+                const div = document.createElement("div");
+                div.className = "form-group";
+
+                // Setting up input fields for each subject and hidden field for `isExam`
+                div.innerHTML = `
+                    <label>${subject}${isExam ? " (exam)" : ""}</label>
+                    <input type="number" step="0.1" min="0" max="5" class="form-control" name="grade_${subject}" placeholder="Enter grade for ${subject}" required>
+                   <input type="hidden" name="isExam_${subject}" value="${isExam}">
+                  `;
+                container.appendChild(div);
+              });
+            }
+
+            // Initialize the subjects based on the current course on page load
+            document.addEventListener("DOMContentLoaded", updateSubjectsAndExams);
+          </script>
+
+          <div class="form-group">
+            <label>Group Code</label>
+            <input type="text" class="form-control" th:field="*{groupCode}" placeholder="Group Code" required>
+          </div>
+          <div class="form-group">
+            <label>Number of Exams (Current Semester)</label>
+            <input type="number" class="form-control" th:field="*{numberOfExams}" id="numExams" placeholder="Number of Exams" readonly>
+          </div>
+          <div class="form-group">
+            <label>Participation in Public Work</label>
+            <select class="form-control" th:field="*{publicWorkParticipation}" required>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Living in Dormitory</label>
+            <select class="form-control" th:field="*{livingInDormitory}" required>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+          <div class="d-flex justify-content-around mt-4">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus ml-2"> Update Student </i></button>
+            <button type="reset" class="btn btn-warning"><i class="fa fa-remove ml-2">Cancel Changes</i> </button>
+          </div>
+        </form>
+        <h4 class="mt-4 text-center">Go Back to <a th:href="@{/students}">List of Students</a></h4>
       </div>
     </div>
   </div>
+</div>
 </body>
 </html>

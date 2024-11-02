@@ -28,5 +28,7 @@ public interface StudentService {
     Map<String, Double> getAverageScoresByGroup();
 
     List<Student> getStudentsForExpulsion();
+    Student getStudentByRecordBookNumber(int recordBookNumber);
+
 }
 

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Grades</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="header"></div>
+<div class="container text-center">
+    <form th:action="@{/recordBookNumber}" method="get" class="d-flex justify-content-center align-items-center mt-5">
+        <input type="text" name="recordBookNumber" placeholder="Write Record book number" class="form-control form-control-lg mx-2">
+        <button type="submit" class="btn btn-primary btn-lg">Show</button>
+    </form>
+
+    <div th:if="${student != null}">
+        <div class="row">
+            <h1 class="display-2 mx-auto p-2 mt-5">Grades for <span th:text="${student.fullName}"></span></h1>
+        </div>
+        <div class="row">
+            <p class="mt-2 h3 mx-auto text-center text-secondary">Student Card Number: <span th:text="${student.studentCardNumber}"></span></p>
+        </div>
+        <div class="row">
+            <p class="mt-2 h3 mx-auto text-center text-secondary">Group Code: <span th:text="${student.groupCode}"></span></p>
+        </div>
+
+        <ul class="nav nav-tabs mt-4">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'no_exam' ? 'active' : ''}"
+                   th:href="@{/recordBookNumber(page='no_exam', recordBookNumber=${student.recordBookNumber})}">Page 1 (Без экзамена)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'exam' ? 'active' : ''}"
+                   th:href="@{/recordBookNumber(page='exam', recordBookNumber=${student.recordBookNumber})}">Page 2 (С экзаменом)</a>
+            </li>
+        </ul>
+
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <div th:switch="${grades}" class="container my-3">
+                        <div class="mx-auto">
+                            <h2 th:case="null">No record found !!</h2>
+                            <div th:case="*">
+                                <table class="table table-striped table-bordered table-responsive-md">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Course</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="grade : ${grades}">
+                                        <td th:text="${grade.subjectName}"></td>
+                                        <td th:text="${grade.course}"></td>
+                                        <td th:text="${grade.grade}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

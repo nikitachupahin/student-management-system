@@ -41,55 +41,60 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private boolean isValidSubject(String subject) {
-        return !(subject.equals("fullName") || subject.equals("course") ||
-                subject.equals("studentCardNumber") || subject.equals("groupCode") ||
+        return !(subject.equals("fullName") || subject.equals("course") || subject.equals("recordBookNumber") ||
+                subject.equals("studentCardNumber") || subject.equals("isExam") || subject.equals("groupCode") ||
                 subject.equals("numberOfExams") || subject.equals("publicWorkParticipation") ||
                 subject.equals("livingInDormitory"));
     }
 
+
     @Override
     public Student addStudent(Student student, Map<String, Object> grades) {
+        if (studentRepository.findByRecordBookNumber(student.getRecordBookNumber()).isPresent()) {
+            throw new IllegalArgumentException("Record Book Number already exists.");
+        }
 
         if (studentRepository.findByStudentCardNumber(student.getStudentCardNumber()).isPresent()) {
             throw new IllegalArgumentException("Student card number already exists.");
         }
 
         student = studentRepository.save(student);
-
         grades.entrySet().removeIf(entry -> !isValidSubject(entry.getKey()));
 
         double totalScore = 0;
         int count = 0;
 
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
-            String subject = entry.getKey();
-            Double gradeValue;
+            String key = entry.getKey();
+            if (key.startsWith("grade_")) {
+                String subject = key.substring(6);
+                Double gradeValue;
 
-            try {
-                if (entry.getValue() instanceof String) {
-                    gradeValue = Double.parseDouble((String) entry.getValue());
-                } else if (entry.getValue() instanceof Number) {
-                    gradeValue = ((Number) entry.getValue()).doubleValue();
-                } else {
+                try {
+                    gradeValue = entry.getValue() instanceof String
+                            ? Double.parseDouble((String) entry.getValue())
+                            : ((Number) entry.getValue()).doubleValue();
+                } catch (NumberFormatException | ClassCastException e) {
                     throw new IllegalArgumentException("Invalid grade value for subject " + subject);
                 }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid grade value for subject " + subject);
+
+                if (gradeValue < 0 || gradeValue > 5) {
+                    throw new IllegalArgumentException("Grade for " + subject + " is out of range: " + gradeValue);
+                }
+
+                boolean isExam = Boolean.parseBoolean(grades.get("isExam_" + subject).toString());
+
+                StudentGrade grade = new StudentGrade();
+                grade.setStudent(student);
+                grade.setCourse(student.getCourse());
+                grade.setSubjectName(subject);
+                grade.setGrade(gradeValue.floatValue());
+                grade.setExam(isExam);
+                studentGradeRepository.save(grade);
+
+                totalScore += gradeValue;
+                count++;
             }
-
-            if (gradeValue < 0 || gradeValue > 100) {
-                throw new IllegalArgumentException("Grade for " + subject + " is out of range: " + gradeValue);
-            }
-
-            StudentGrade grade = new StudentGrade();
-            grade.setStudent(student);
-            grade.setCourse(student.getCourse());
-            grade.setSubjectName(subject);
-            grade.setGrade(gradeValue.floatValue());
-            studentGradeRepository.save(grade);
-
-            totalScore += gradeValue;
-            count++;
         }
 
         student.setAverageScore(count > 0 ? totalScore / count : 0);
@@ -100,6 +105,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
+
+
     @Transactional
     @Override
     public Student updateStudent(Student student, Map<String, Object> grades) {
@@ -107,10 +114,15 @@ public class StudentServiceImpl implements StudentService {
             throw new IllegalArgumentException("Student card number cannot be null.");
         }
 
+        // Find the existing student
         Student existingStudent = studentRepository.findById(student.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
+        // Check if the course has changed
         boolean courseChanged = existingStudent.getCourse() != student.getCourse();
+
+        // Update student details
+        existingStudent.setStudentCardNumber(student.getStudentCardNumber());
         existingStudent.setCourse(student.getCourse());
         existingStudent.setFullName(student.getFullName());
         existingStudent.setNumberOfExams(student.getNumberOfExams());
@@ -118,18 +130,34 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setPublicWorkParticipation(student.isPublicWorkParticipation());
         existingStudent.setGroupCode(student.getGroupCode());
 
-        List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
-        studentGradeRepository.deleteAll(existingGrades);
+        // Get exam subjects and all subjects for the updated course
+        List<String> examSubjects = getExamSubjectsForCourse(student.getCourse());
+        List<String> courseSubjects = getAllSubjectsForCourse(student.getCourse());
 
-        List<StudentGrade> updatedGrades = new ArrayList<>();
+        // Retrieve existing grades for the student
+        List<StudentGrade> existingGrades = studentGradeRepository.findByStudentId(student.getId());
+        Map<String, StudentGrade> existingGradesMap = existingGrades.stream()
+                .collect(Collectors.toMap(StudentGrade::getSubjectName, grade -> grade));
+
         double totalScore = 0;
         int count = 0;
 
+        List<StudentGrade> updatedGrades = new ArrayList<>();
+
         for (Map.Entry<String, Object> entry : grades.entrySet()) {
-            String subject = entry.getKey();
-            if (!isValidSubject(subject)) {
+            String key = entry.getKey();
+
+
+            if (key.startsWith("isExam_")) {
                 continue;
             }
+
+            String subject = key.startsWith("grade_") ? key.substring(6) : key;
+
+            if (!courseSubjects.contains(subject)) {
+                continue;
+            }
+
 
             Double gradeValue;
             try {
@@ -140,24 +168,36 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid grade value for subject " + subject);
             }
 
+            boolean isExam = examSubjects.contains(subject);
 
-            StudentGrade newGrade = new StudentGrade();
-            newGrade.setStudent(existingStudent);
-            newGrade.setCourse(existingStudent.getCourse());
-            newGrade.setSubjectName(subject);
-            newGrade.setGrade(gradeValue.floatValue());
-            updatedGrades.add(newGrade);
+            StudentGrade grade = existingGradesMap.get(subject);
+            if (grade == null) {
+                grade = new StudentGrade();
+                grade.setStudent(existingStudent);
+                grade.setSubjectName(subject);
+            }
+
+            grade.setGrade(gradeValue.floatValue());
+            grade.setCourse(existingStudent.getCourse());
+            grade.setExam(isExam);
+
+            updatedGrades.add(grade);
 
             totalScore += gradeValue;
             count++;
         }
 
 
-        if (!updatedGrades.isEmpty()) {
-            studentGradeRepository.saveAll(updatedGrades);
+        for (StudentGrade existingGrade : existingGrades) {
+            if (!courseSubjects.contains(existingGrade.getSubjectName())) {
+                studentGradeRepository.delete(existingGrade);
+            }
         }
 
 
+        if (!updatedGrades.isEmpty()) {
+            studentGradeRepository.saveAll(updatedGrades);
+        }
         if (courseChanged || !updatedGrades.isEmpty()) {
             existingStudent.setAverageScore(count > 0 ? totalScore / count : existingStudent.getAverageScore());
             studentRepository.save(existingStudent);
@@ -168,8 +208,43 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
+
+    private List<String> getExamSubjectsForCourse(int course) {
+        switch (course) {
+            case 1:
+                return List.of("CS", "ASD", "Math");
+            case 2:
+                return List.of("ASD", "SA");
+            case 3:
+                return List.of("ML", "Math");
+            case 4:
+                return List.of("ML", "CS");
+            default:
+                return new ArrayList<>();
+        }
+    }
+
+    private List<String> getAllSubjectsForCourse(int course) {
+        switch (course) {
+            case 1:
+                return List.of("CS", "ASD", "English", "Math", "SA");
+            case 2:
+                return List.of("CS", "ASD", "English", "SA");
+            case 3:
+                return List.of("CS", "ML", "English", "Math", "SA");
+            case 4:
+                return List.of("CS", "ML", "English");
+            default:
+                return new ArrayList<>();
+        }
+    }
+
+
+
+
     @Override
     public List<StudentGrade> getGradesByStudentId(Long studentId) {
+        logService.log("Getting grades by student id");
         return studentGradeRepository.findByStudentId(studentId);
     }
 
@@ -237,12 +312,14 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Map<String, List<Student>> getAllStudentsGroupedByGroupCode() {
+        logService.log("Getting all Students grouped by group Code");
         List<Student> students = studentRepository.findAllByOrderByFullNameAsc();
         return students.stream().collect(Collectors.groupingBy(Student::getGroupCode));
     }
 
     @Override
     public Map<String, Double> getAverageScoresByGroup() {
+        logService.log("Getting avg score by group");
         List<Student> students = studentRepository.findAll();
 
         return students.stream()
@@ -254,15 +331,26 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<Student> getStudentsForExpulsion() {
+        logService.log("Getting students for expulsion");
         List<Student> students = studentRepository.findAll();
 
         return students.stream()
                 .filter(student -> {
                     long failedSubjectsCount = studentGradeRepository.findByStudentId(student.getId()).stream()
-                            .filter(grade -> grade.getGrade() < 3) // assuming grade < 3 is a failing grade (e.g., 2)
+                            .filter(grade -> grade.getGrade() < 3)
                             .count();
-                    return failedSubjectsCount > 2; // More than 2 failing grades
+                    return failedSubjectsCount > 2;
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Student getStudentByRecordBookNumber(int recordBookNumber) {
+        logService.log("Getting students by record number");
+        return studentRepository.findByRecordBookNumber(recordBookNumber).orElse(null);
+    }
+
+
+
+
 }

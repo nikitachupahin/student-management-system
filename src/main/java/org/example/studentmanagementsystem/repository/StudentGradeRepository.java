@@ -9,4 +9,5 @@ public interface StudentGradeRepository extends JpaRepository<StudentGrade, Long
     void deleteByStudentId(Long studentId);
 
     List<StudentGrade> findByStudentId(long id);
+    
 }

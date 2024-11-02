@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Student</title>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
-<style>
-    .d-flex button {
-        font-size: 20px;
-    }
-</style>
-<body>
+    <!DOCTYPE html>
+    <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Add Student</title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </head>
+    <body>
     <div th:replace="header.html"></div>
     <div class="container mt-5 mb-5">
         <div class="row">
@@ -29,40 +24,55 @@
                         </div>
                         <div class="form-group">
                             <label>Course</label>
-                            <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjects()" placeholder="Course" required>
+                            <input type="number" class="form-control" th:field="*{course}" id="course" onchange="updateSubjectsAndExams()" placeholder="Course" required>
                         </div>
 
-                        <div id="subjects-container">
-
+                        <div class="form-group">
+                            <label>Record Book Number</label>
+                            <input type="text" class="form-control" th:field="*{recordBookNumber}" name="recordBookNumber" placeholder="Record Book Number" required>
                         </div>
+
+                        <div th:if="${error}" class="alert alert-danger text-center mt-3">
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <div id="subjects-container"></div>
 
                         <script>
-                            function updateSubjects() {
+                            function updateSubjectsAndExams() {
                                 const course = document.getElementById("course").value;
                                 const container = document.getElementById("subjects-container");
                                 container.innerHTML = "";
 
                                 let subjects = [];
-
+                                let exams = [];
 
                                 if (course == 1) {
                                     subjects = ["CS", "ASD", "English", "Math", "SA"];
+                                    exams = ["CS", "ASD", "Math"];
                                 } else if (course == 2) {
                                     subjects = ["CS", "ASD", "English", "SA"];
+                                    exams = ["ASD", "SA"];
                                 } else if (course == 3) {
                                     subjects = ["CS", "ML", "English", "Math", "SA"];
+                                    exams = ["ML", "Math"];
                                 } else if (course == 4) {
                                     subjects = ["CS", "ML", "English"];
+                                    exams = ["ML", "CS"];
                                 }
 
+                                document.getElementById("numExams").value = exams.length;
 
                                 subjects.forEach(subject => {
+                                    const isExam = exams.includes(subject);
                                     const div = document.createElement("div");
                                     div.className = "form-group";
+
                                     div.innerHTML = `
-                    <label>${subject}</label>
-                    <input type="number" step="0.1" min="0" max="5" class="form-control" name="${subject}" placeholder="Enter grade for ${subject}" required>
-                `;
+                                        <label>${subject}${isExam ? " (exam)" : ""}</label>
+                                        <input type="number" step="0.1" min="0" max="5" class="form-control" name="grade_${subject}" placeholder="Enter grade for ${subject}" required>
+                                        <input type="hidden" name="isExam_${subject}" value="${isExam}">
+                                    `;
                                     container.appendChild(div);
                                 });
                             }
@@ -75,7 +85,7 @@
 
                         <div class="form-group">
                             <label>Number of Exams</label>
-                            <input type="number" class="form-control" th:field="*{numberOfExams}" placeholder="Number of Exams" required>
+                            <input type="number" class="form-control" th:field="*{numberOfExams}" id="numExams" placeholder="Number of Exams" readonly>
                         </div>
                         <div class="form-group">
                             <label>Participation in Public Work</label>
@@ -101,5 +111,5 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+    </body>
+    </html>
