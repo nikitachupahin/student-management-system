@@ -32,7 +32,7 @@
                                 <tbody>
                                 <tr th:each="entry : ${averageScoresByGroup}">
                                     <td class="text-uppercase" th:text="${entry.key}"></td>
-                                    <td th:text="${entry.value}"></td>
+                                    <td th:text="${#numbers.formatDecimal(entry.value, 1, 1)}"></td>
                                 </tr>
                                 </tbody>
                             </table>

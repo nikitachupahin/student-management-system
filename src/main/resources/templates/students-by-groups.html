@@ -43,7 +43,7 @@
                                     <td><a th:text="${student.fullName}" th:href="@{/students/{id}/grades (id=${student.id}) }"></a></td>
                                     <td th:text="${student.course}"></td>
                                     <td class="text-uppercase" th:text="${student.groupCode}"></td>
-                                    <td th:text="${student.averageScore}"></td>
+                                    <td th:text="${#numbers.formatDecimal(student.averageScore, 1, 1)}"></td>
                                     <td th:text="${student.numberOfExams}"></td>
                                     <td th:text="${student.publicWorkParticipation ? 'Yes' : 'No'}"></td>
                                     <td th:text="${student.livingInDormitory ? 'Yes' : 'No'}"></td>

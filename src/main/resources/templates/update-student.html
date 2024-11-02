@@ -16,7 +16,7 @@
         <form th:action="@{/students/{id} (id=${student.getId()})}" th:object="${student}" method="post">
           <div class="form-group">
             <label>Student Card Number</label>
-            <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" required>
+            <input type="number" class="form-control" th:field="*{studentCardNumber}" placeholder="Student Card Number" readonly>
           </div>
           <div class="form-group">
             <label>Full Name</label>
