@@ -4,9 +4,6 @@ Student Management System is a web-based application that can be used to manage 
 ## Home page
 <img src="./img/home.png" width="700">
 
-## UML Class Diagram 
-<img src="./img/UML.png" width="700">
-
 ## Built With
 <ul>
   <li>Java</li>
