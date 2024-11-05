@@ -10,6 +10,18 @@
     .col a {
         font-size: 30px;
     }
+    .card {
+        max-width: 1200px;
+    }
+
+    table{
+        width:1100px;
+    }
+
+    .my-3{
+        padding:0;
+    }
+
 </style>
 <body>
 <div th:replace="header"></div>
@@ -17,7 +29,7 @@
     <div class="row">
         <h1 class="display-2 mx-auto p-2 mt-5 mb-5">List of Students</h1>
     </div>
-    <div class="container mb-5">
+
         <div class="card">
             <div class="card-body">
                 <div th:switch="${students}" class="container my-3">
@@ -72,6 +84,5 @@
             </div>
         </div>
     </div>
-</div>
 </body>
 </html>
