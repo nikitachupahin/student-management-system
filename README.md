@@ -5,7 +5,7 @@ Student Management System is a web-based application that can be used to manage 
 <img src="./img/home.png" width="700">
 
 ## UML Class Diagram 
-<img src="./img/UML.png" width="700">
+<img style="background-color: white" src="./img/UML.png" width="700">
 
 ## Built With
 <ul>
